@@ -4,13 +4,13 @@ import (
 	"crypto/md5"
 	"fmt"
 )
-type Entity struct {
+type Entry struct {
 	Key string
 	Value string
 }
 
 type Node struct {
-	Data Entity
+	Data Entry
 	Next *Node
 }
 
@@ -19,7 +19,7 @@ type Linklist struct {
 	current *Node
 }
 
-func (list *Linklist) Append (entity Entity) {
+func (list *Linklist) Append (entity Entry) {
 	node := Node { Data: entity, Next: nil}
 	if list.head == nil {
 		list.head = &node
@@ -30,16 +30,51 @@ func (list *Linklist) Append (entity Entity) {
 	}
 }
 
+func (list *Linklist) Exist (key string) bool {
+	p := list.head
+	for p != nil {
+		if p.Data.Key == key {
+			return true
+		}
+		p = p.Next
+	}
+	return false
+}
+
 func (list *Linklist) Print () {
 	p := list.head
 	for p != nil {
 		fmt.Printf("%s->", p.Data.Key)
 		p = p.Next
+
 	}
+	fmt.Print("\n")
 }
 
 type HashTable struct {
-	Table [16]Linklist
+	buckets [16]Linklist
+}
+
+func (table *HashTable) Put (key string, value string) {
+	entry := Entry{key,value}
+	pos := GetHashCode(key) % 16
+	if table.buckets[pos].Exist(key) {
+		return
+	}
+	table.buckets[pos].Append(entry)
+}
+
+func (table *HashTable) Get (key string) (value string) {
+	pos := GetHashCode(key) % 16
+	list := table.buckets[pos]
+	p := list.head
+	for p != nil {
+		if p.Data.Key == key {
+			value = p.Data.Value
+			return
+		}
+	}
+	return
 }
 
 func GetHashCode(key string) (code int) {
@@ -51,24 +86,13 @@ func GetHashCode(key string) (code int) {
 }
 
 func main() {
-	var list Linklist
-	data1 := Entity{
-		Key:   "shawn",
-		Value: "12345",
-	}
-	data2 := Entity{
-		Key:   "coin",
-		Value: "67890",
-	}
-	data3 := Entity{
-		Key:   "apple",
-		Value: "55667",
-	}
 
-	list.Append(data1)
-	list.Append(data2)
-	list.Append(data3)
+	var ht HashTable
+	ht.Put("data001", "qwertyuiop")
+	ht.Put("data002", "asdfghjkl;")
+	ht.Put("data003", "zxcvbnm,./")
 
-	list.Print()
+	fmt.Print(ht.Get("data001"))
+
 
 }
