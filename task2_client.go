@@ -5,19 +5,24 @@ import (
 	"io"
 	"net"
 	"os"
-	"time"
 )
 
-func main(){
-	conn, err := net.Dial("tcp", ":7777")
+
+func main() {
+	fmt.Println("开始下载...")
+	downloadBlock("7777")
+	downloadBlock("8888")
+	downloadBlock("9999")
+}
+
+func downloadBlock(server string) {
+	conn, err := net.Dial("tcp", ":"+server)
 	if err != nil {
 		fmt.Println("Error connecting:", err)
 		os.Exit(1)
 	}
-	fmt.Println("开始下载...")
-	go spinner(100 * time.Millisecond)
-	timestamp := time.Now().Format("15-04-05")
-	fileName := "data_task1" + "-" + timestamp
+
+	fileName := "data_task2-" + server + ".txt"
 	file, err := os.Create(fileName)
 	if err != nil {
 		panic(err)
@@ -40,14 +45,4 @@ func main(){
 	}
 	fmt.Printf("下载完成 [%s]\n", fileName)
 	defer conn.Close()
-}
-
-// 下载过程动画
-func spinner(delay time.Duration) {
-	for {
-		for _, r := range `-\|/` {
-			fmt.Printf("\r%c", r)
-			time.Sleep(delay)
-		}
-	}
 }

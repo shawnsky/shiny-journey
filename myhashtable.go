@@ -86,13 +86,9 @@ func GetHashCode(key string) (code int) {
 }
 
 func main() {
-
 	var ht HashTable
-	ht.Put("data001", "qwertyuiop")
-	ht.Put("data002", "asdfghjkl;")
-	ht.Put("data003", "zxcvbnm,./")
-
-	fmt.Print(ht.Get("data001"))
-
-
+	ht.Put("c", "xt123")
+	ht.Put("t", "y456")
+	ht.Put("r", "pj789")
+	fmt.Println(ht.Get("r"))
 }

@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var filename = "data"
+var filename = "data_task1"
 
 func connHandler(c net.Conn) {
 	defer c.Close()
