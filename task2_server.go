@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
@@ -24,12 +25,21 @@ func sendBlockedFileHandler(c net.Conn) {
 	buffCount := fileSize / 512
 	// 计算每块数据需要读几次buff
 	sendCount := int(buffCount / 3)
-	// 创建buffer
-	buf := make([]byte, 512)
+	// 每次发送整数个buff，有剩余字节数
+	remainCount := (fileSize/3) % 512
+	// 创建3个buffer
+	buf := make([]byte, 512)  // 发送文件
+	remainBuf := make([]byte, remainCount)  // 发送单块剩余字节
+	fileLenBuf := make([]byte, 8)  // 发送文件长度
 
+	// 先发送文件大小，方便客户端计算分块大小
+	binary.BigEndian.PutUint64(fileLenBuf, uint64(fileSize))
+	_, _ = c.Write(fileLenBuf)
+
+	// 根据启动端口号区分逻辑主机
 	flag := os.Args[1]
 
-	if flag == "7777" { // 发送第一块数据
+	if flag == "7777" { // 主机1发送第一块数据
 		for i := 0; i < sendCount; i++ {
 			cnt, err := fs.Read(buf)
 			if err == io.EOF {
@@ -41,8 +51,18 @@ func sendBlockedFileHandler(c net.Conn) {
 				break
 			}
 		}
-	} else if flag == "8888" { // 发送第二块数据
-		sent := int64(sendCount) * 512
+		// 发送剩余字节
+		cnt, err := fs.Read(remainBuf)
+		if err == io.EOF {
+			return
+		}
+		_, err = c.Write(remainBuf[:cnt])
+		if err != nil {
+			fmt.Println("文件发送失败，可能是客户端已断开")
+			return
+		}
+	} else if flag == "8888" { // 主机2发送第二块数据
+		sent := int64(sendCount) * 512 + remainCount
 		// 移动文件指针
 		_, _ = fs.Seek(sent, 0)
 		for i := 0; i < sendCount; i++ {
@@ -57,11 +77,23 @@ func sendBlockedFileHandler(c net.Conn) {
 			}
 		}
 
-	} else if flag == "9999" {
-		sent := int64(sendCount) * 512 * 2
+		// 发送剩余字节
+		cnt, err := fs.Read(remainBuf)
+		if err == io.EOF {
+			return
+		}
+		_, err = c.Write(remainBuf[:cnt])
+		if err != nil {
+			fmt.Println("文件发送失败，可能是客户端已断开")
+			return
+		}
+
+	} else if flag == "9999" {  // 主机3发送第三块数据，直到文件末尾
+		sent := int64(sendCount) * 512 * 2 + remainCount * 2
 		// 移动文件指针
 		_, _ = fs.Seek(sent, 0)
-		for i := 0; i < sendCount; i++ {
+		// 发送剩余全部字节
+		for {
 			cnt, err := fs.Read(buf)
 			if err == io.EOF {
 				break
