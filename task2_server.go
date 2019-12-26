@@ -26,11 +26,11 @@ func sendBlockedFileHandler(c net.Conn) {
 	// 计算每块数据需要读几次buff
 	sendCount := int(buffCount / 3)
 	// 每次发送整数个buff，有剩余字节数
-	remainCount := (fileSize/3) % 512
+	remainCount := (fileSize / 3) % 512
 	// 创建3个buffer
-	buf := make([]byte, 512)  // 发送文件
-	remainBuf := make([]byte, remainCount)  // 发送单块剩余字节
-	fileLenBuf := make([]byte, 8)  // 发送文件长度
+	buf := make([]byte, 512)               // 发送文件
+	remainBuf := make([]byte, remainCount) // 发送单块剩余字节
+	fileLenBuf := make([]byte, 8)          // 发送文件长度
 
 	// 先发送文件大小，方便客户端计算分块大小
 	binary.BigEndian.PutUint64(fileLenBuf, uint64(fileSize))
@@ -62,7 +62,7 @@ func sendBlockedFileHandler(c net.Conn) {
 			return
 		}
 	} else if flag == "8888" { // 主机2发送第二块数据
-		sent := int64(sendCount) * 512 + remainCount
+		sent := int64(sendCount)*512 + remainCount
 		// 移动文件指针
 		_, _ = fs.Seek(sent, 0)
 		for i := 0; i < sendCount; i++ {
@@ -88,8 +88,8 @@ func sendBlockedFileHandler(c net.Conn) {
 			return
 		}
 
-	} else if flag == "9999" {  // 主机3发送第三块数据，直到文件末尾
-		sent := int64(sendCount) * 512 * 2 + remainCount * 2
+	} else if flag == "9999" { // 主机3发送第三块数据，直到文件末尾
+		sent := int64(sendCount)*512*2 + remainCount*2
 		// 移动文件指针
 		_, _ = fs.Seek(sent, 0)
 		// 发送剩余全部字节

@@ -5,8 +5,9 @@ import (
 	"math/rand"
 	"time"
 )
-var N = 10  // 启用的协程数量，每协程计算一百万个点
-var each = 1000000
+
+var N = 10         // 启用的协程数量
+var each = 1000000 // 每个协程计算一百万个点
 var r = 100.0
 var countIn = 0
 var countAll = each * N
@@ -33,12 +34,12 @@ func main() {
 
 	beginTime := time.Now()
 
-	for i:=0;i<N;i++ {
+	for i := 0; i < N; i++ {
 		go calculate(ch)
 	}
 
-	for i :=0;i<N;i++ {
-		countIn += <- ch
+	for i := 0; i < N; i++ {
+		countIn += <-ch
 	}
 
 	pi := float64(countIn) / float64(countAll) * 4

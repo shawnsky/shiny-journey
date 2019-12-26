@@ -4,8 +4,9 @@ import (
 	"crypto/md5"
 	"fmt"
 )
+
 type Entry struct {
-	Key string
+	Key   string
 	Value string
 }
 
@@ -15,12 +16,12 @@ type Node struct {
 }
 
 type Linklist struct {
-	head *Node
+	head    *Node
 	current *Node
 }
 
-func (list *Linklist) Append (entity Entry) {
-	node := Node { Data: entity, Next: nil}
+func (list *Linklist) Append(entity Entry) {
+	node := Node{Data: entity, Next: nil}
 	if list.head == nil {
 		list.head = &node
 		list.current = list.head
@@ -30,7 +31,7 @@ func (list *Linklist) Append (entity Entry) {
 	}
 }
 
-func (list *Linklist) Exist (key string) bool {
+func (list *Linklist) Exist(key string) bool {
 	p := list.head
 	for p != nil {
 		if p.Data.Key == key {
@@ -41,7 +42,7 @@ func (list *Linklist) Exist (key string) bool {
 	return false
 }
 
-func (list *Linklist) Print () {
+func (list *Linklist) Print() {
 	p := list.head
 	for p != nil {
 		fmt.Printf("%s->", p.Data.Key)
@@ -55,8 +56,8 @@ type HashTable struct {
 	buckets [16]Linklist
 }
 
-func (table *HashTable) Put (key string, value string) {
-	entry := Entry{key,value}
+func (table *HashTable) Put(key string, value string) {
+	entry := Entry{key, value}
 	pos := GetHashCode(key) % 16
 	if table.buckets[pos].Exist(key) {
 		return
@@ -64,7 +65,7 @@ func (table *HashTable) Put (key string, value string) {
 	table.buckets[pos].Append(entry)
 }
 
-func (table *HashTable) Get (key string) (value string) {
+func (table *HashTable) Get(key string) (value string) {
 	pos := GetHashCode(key) % 16
 	list := table.buckets[pos]
 	p := list.head

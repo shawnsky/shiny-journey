@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func main(){
+func main() {
 	conn, err := net.Dial("tcp", ":7777")
 	if err != nil {
 		fmt.Println("Error connecting:", err)
